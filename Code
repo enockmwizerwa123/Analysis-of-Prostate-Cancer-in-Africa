@@ -1,0 +1,140 @@
+library(lessR)
+library(dplyr)
+library(psych)
+library(xtable)
+install.packages("ggplot2")
+install.packages("tidyverse")
+library(ggplot2)
+install.packages("corrplot")
+library(corrplot)
+library(foreign)
+install.packages("stargazer")
+library(stargazer)
+
+# Exercise 2
+#Loadig of given Dataset
+
+
+data <- read.csv("prostate-cancer-1.csv")
+data
+
+dim(data)
+
+summary(data)
+
+
+
+xtable(describe(data))
+
+str(data)
+
+# missing values
+data_miss <- (is.na(data))
+data_miss
+
+sum(is.na(data))
+
+matr_Correlat<-cor(data)
+matr_Correlat
+xtable(matr_Correlat)
+
+# 2
+data_count <- table(data$Y)
+barplot(data_count, col=c('blue','green'), xlab="Y", ylab = "Number of individuals")
+jpeg(file="saving_plot1.jpeg")
+barplot(data_count, col=c('blue','green'), xlab="Y", ylab = "Number of individuals")
+dev.off()
+
+# 3
+dim(data)
+
+# 4
+boxplot(data[,c(2,5,4,7,8,3,6,9)])
+plot(data[,c(2,5,4,7,8,3,6,9)])
+jpeg(file="saving_plot1.jpeg")
+boxplot(data[,c(2,5,4,7,8,3,6,9)])
+dev.off()
+
+# Exercise 4
+
+
+data2 <- read.csv("gifted.csv")
+data2
+
+str(data2)
+
+# missing values
+sum(is.na(data2))
+
+# 1
+# scatterplot
+plot(data2, lower.panel=NULL)
+jpeg(file="saving_plot1.jpeg")
+plot(data2, lower.panel=NULL)
+dev.off()
+
+#correlation
+cor(data2)
+
+matr_Correlat<-cor(data2)
+matr_Correlat
+xtable(matr_Correlat)
+
+
+corrplot(cor(data2))#mother and score are high correted
+jpeg(file="saving_plot1.jpeg")
+corrplot(cor(data2))#mother and score are high correted
+dev.off()
+
+
+#histogram
+score <- data2$score
+hist(score, xlab='score',col ="blue")
+jpeg(file="saving_plot1.jpeg")
+hist(score, xlab='score',col ="blue")
+dev.off()
+
+hist(data2$score,probability=T, col = 3, main="Histogram of skewed data",xlab="score")
+lines(density(data2$score),col=2)  
+
+jpeg(file="saving_plot1.jpeg")
+hist(data2$score,probability=T, col = 3, main="Histogram of skewed data",xlab="score")
+lines(density(data2$score),col=2)  
+dev.off()
+shapiro.test(data2$score)
+
+
+#4 Simple Linear Model
+lin.mod <- lm(score~motheriq, data = data2)
+summary(lin.mod)
+
+xtable(summary(lin.mod))
+
+# 5. 4 residual analysis plots
+par(mfrow=c(2,2))
+plot(lin.mod,which = 1,main = 'linearity')
+plot(lin.mod,which=2,main = 'normality')
+plot(lin.mod,which=3,main = 'homoskedasticity')
+plot(lin.mod,which=4,main='outliers')
+
+# interpretation of slope
+
+#7 confidence bands and the prediction bands for this model
+
+preddata <- data.frame( conf.band[,1], conf.band[,2], conf.band[,3], pred.band[,2], pred.band[,3], xnew,ynew)
+colnames(preddata) <- c('yhat', 'lc', 'uc', 'lp','up', 'x', 'y')
+
+
+p <- ggplot(preddata, aes(x, y)) +
+  geom_point() +
+  geom_line(color='blue', aes(x=x, y=yhat))
+
+p + geom_line(aes(y = lc), color = "blue", linetype = "dotted")+
+  geom_line(aes(y = uc), color = "blue", linetype = "dotted") +
+  geom_line(aes(y = lp), color = "red", linetype = "dashed")+
+  geom_line(aes(y = up), color = "red", linetype = "dashed") 
+
+
+#8 Multiple Linear Regression Model
+multi.mod <- lm(score~., data=data2)
+summary(multi.mod)
